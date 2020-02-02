@@ -31,10 +31,29 @@ s = socket.socket()
 s.bind((IP,PORT))
 s.listen(50)
 s.settimeout(0.0001)
+def CommunicateWithPlayer(__client__):
+    while True:
+        try:
+            m = __client__.id.recv(1)
+            m = m.decode("UTF-8")
+            if(m[0] == 'A'):
+                __client__.x+=5 #right
+                UpdatePlayers()
+            elif(m[0] == 'B'):
+                __client__.x-=5 #left
+                UpdatePlayers()
+            elif(m[0] == 'C'):
+                __client__.y+=5 #down
+                UpdatePlayers()
+            elif(m[0] == 'D'):
+                __client__.y-=5 #up
+                UpdatePlayers()
+        except:
+            pass
 def UpdatePlayers():
     players = []
     for client in clients:
-        playerDict = {'name': client.name, 'X': client.x, 'Y':client.y}
+        playerDict = {'name': client.name, 'X': client.x, 'Y':client.y, 'H':client.Health}
         players.append(playerDict)
     for e in clients:
         obj = pickle.dumps(players)
@@ -54,6 +73,8 @@ def HandleConnections():
             player = Player(client, name.decode('UTF-8'), address, 100.0, 0, 0)
             player.printInformation()
             clients.append(player)
+            thread = Thread(target=CommunicateWithPlayer, args=[player])
+            thread.start()
             message = 'F'+player.name + " has joined the game."
             print(player.name + " has connected. IP: " + str(player.ip))
             for c in clients:
@@ -62,28 +83,9 @@ def HandleConnections():
             UpdatePlayers()
         except:
             pass
-def CommunicateWithPlayers():
-    while True:
-        try:
-            for c in clients:
-                m = c.id.recv(1)
-                m = m.decode("UTF-8")
-                if(m[0] == 'A'):
-                    c.x+=5 #right
-                    UpdatePlayers()
-                elif(m[0] == 'B'):
-                    c.x-=5 #left
-                    UpdatePlayers()
-                elif(m[0] == 'C'):
-                    c.y+=5 #down
-                    UpdatePlayers()
-                elif(m[0] == 'D'):
-                    c.y-=5 #up
-                    UpdatePlayers()
-        except:
-            pass
+
 ConnectionHandler = Thread(target=HandleConnections)
-PlayerMovementHandler = Thread(target=CommunicateWithPlayers)
+#PlayerMovementHandler = Thread(target=CommunicateWithPlayers)
 ConnectionHandler.start()
-PlayerMovementHandler.start()
+#PlayerMovementHandler.start()
 print("Server has started.")
