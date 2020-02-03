@@ -1,2 +1,2 @@
 # M711Platform
-A sandbox game written in pygame.
+A multiplayer sandbox game written in python (uses pygame).
