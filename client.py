@@ -46,7 +46,7 @@ WHITE = (255,255,255)
 GREEN = (10,150,10)
 RED = (150,10,10)
 BLUE = (10,10,150)
-TEST = (0,0,0,150)
+TEST = (0,0,0,100)
 #Game settings
 SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 600
@@ -57,9 +57,9 @@ X, Y = 0.0, 0.0
 Health = 100.0
 
 players = []
+checkpoints = []
 
-chatLog = "Welcome to M711 platform!"
-
+chatLog = "Welcome to M711Dimension!"
 
 #Connection to the server.
 IP = '127.0.0.1'
@@ -75,7 +75,10 @@ pygame.font.init()
 myfont = pygame.font.SysFont('Comic Sans MS', 8)
 textChatFont = pygame.font.SysFont('Arial',15)
 surface = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-pygame.display.set_caption("M711Platform")
+Transparent_Surface = pygame.Surface((SCREEN_WIDTH,SCREEN_HEIGHT), pygame.SRCALPHA)
+surface.blit(Transparent_Surface, (0,0))
+
+pygame.display.set_caption("M711Dimension")
 
 playerSheet = spritesheet("george.png", 4,4)
 
@@ -123,7 +126,6 @@ def gameLoop():
                         s.send(msg)
 
         for player in players:
-            #pygame.draw.rect(surface, BLUE, (player['X'], player['Y'], 50,50))
             if(player['D'] == SOUTH):
                 playerSheet.draw(surface,0,player['X'], player['Y'])
             elif(player['D'] == WEST):
@@ -149,7 +151,14 @@ def gameLoop():
             for player in players:
                 playerlisttext+=player['name']+'\t\t'+str(player['S'])+'\n'
             ptext.draw(playerlisttext,((SCREEN_WIDTH/2)-(BOX_WIDTH/2), (SCREEN_HEIGHT/2)-(BOX_HEIGHT/2)), color=WHITE)
+        Transparent_Surface.fill((200, 200, 200, 10))
         ptext.draw(chatLog,(10,SCREEN_HEIGHT-150), color=BLUE)
+        pygame.draw.circle(Transparent_Surface, (150,10,10,150), (100,200),20)
+
+        surface.blit(Transparent_Surface, (0,0))
+
+        #pygame.draw.circle(Transparent_Surface, (200,200,200,50), (0,0), 120)
+
         pygame.display.update()
         pygame.time.Clock().tick(FPS)
 def recvMessages():
@@ -163,7 +172,14 @@ def recvMessages():
                 temp = message.decode('UTF-8')
             except:
                 temp = pickle.loads(message)
-                players=temp
+                plist = [] #playerlist
+                cplist = []
+                for t in temp:
+                    if(t['type']=='player'):
+                        plist.append(t)
+                    elif(t['type']=='checkpoint'):
+                        cplist.append(t)
+                players = plist
             if(temp[0] == 'F'):
                 temp = message.decode('UTF-8')
                 print(temp[1:])

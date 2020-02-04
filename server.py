@@ -2,14 +2,47 @@ import socket
 from threading import Thread
 import pickle
 import time
+import math
+from configparser import ConfigParser
 
+class Server:
+    def __init__(self, hostname, language, port, maxplayers, rconpassword, password):
+        self.hostname = hostname
+        self.language = language
+        self.port = port
+        self.maxplayers = maxplayers
+        self.rconpassword = rconpassword
+        self.password = password
+        print(f"{self.hostname} has been successfuly launched on {port} with {maxplayers} max player count.")
 print("Launching the server...")
+
+config = ConfigParser()
+
+try:
+    config.read('server_config.ini')
+except:
+    print("ERROR COULD NOT FIND server_config.ini")
+    quit()
+
+shs=config.get("main", "hostname")
+sl=config.get("main", "language")
+sp=config.get("main", "port")
+smp=config.get("main", "maxplayers")
+srp=config.get("main", "rconpassword")
+sps=config.get("main","password")
 
 #
 SOUTH = 0
 WEST = 1
 NORTH = 2
 EAST = 3
+
+def GetTheDistanceBetweenTwoPoints(x,y,x1,y1):
+    a = (x - x1)**2
+    b = (y - y1)**2
+    R = math.sqrt(a + b)
+    return R
+
 
 class Player:
     def __init__(self, ID,NAME, IP, HEALTH, X,Y):
@@ -33,6 +66,12 @@ class Player:
         return self.score
     def printInformation(self):
         print("Name: " + self.name + " IP: " + str(self.ip) + " Health: " + str(self.Health) + " X: " +str(self.x) +" Y: "+str(self.y))
+    def IsInRangeOfPoint(self, range, x,y):
+        R=GetTheDistanceBetweenTwoPoints(self.x, self.y, x,y)
+        if(R <= range):
+            return True
+        else:
+            return False
 clients = []
 
 IP = '127.0.0.1'
@@ -41,6 +80,7 @@ s = socket.socket()
 s.bind((IP,PORT))
 s.listen(50)
 s.settimeout(0.0001)
+
 
 def SendAllPlayersMessage(message):
     for client in clients:
@@ -90,7 +130,7 @@ def CommunicateWithPlayer(__client__):
 def UpdatePlayers():
     players = []
     for client in clients:
-        playerDict = {'name': client.name, 'X': client.x, 'Y':client.y, 'H':client.Health, 'S':client.score, 'D': client.direction}
+        playerDict = {'type': 'player','name': client.name, 'X': client.x, 'Y':client.y, 'H':client.Health, 'S':client.score, 'D': client.direction}
         players.append(playerDict)
     for e in clients:
         obj = pickle.dumps(players)
@@ -117,4 +157,4 @@ def HandleConnections():
 if(__name__=='__main__'):
     ConnectionHandler = Thread(target=HandleConnections)
     ConnectionHandler.start()
-    print("Server has started.")
+server = Server(shs,sl,sp,smp,srp,sps)
