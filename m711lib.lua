@@ -1,7 +1,6 @@
 function SendMessageToAllPlayers(fmessage)
-	--str = 'SendAllPlayersMessage('..fmessage..')'
-	str = 'print('..fmessage..')'
-	python.eval(str)
+	code = string.format("SendAllPlayersMessage('%s')", fmessage)
+	python.eval(code)
 end
 function SendMessageToPlayer(playerid, message)
 	--Nothing to be done...

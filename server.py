@@ -49,8 +49,8 @@ def GetTheDistanceBetweenTwoPoints(x,y,x1,y1):
 
 
 class Player:
-    def __init__(self, ID,NAME, IP, HEALTH, X,Y):
-        self.id = ID
+    def __init__(self, id,NAME, IP, HEALTH, X,Y):
+        self.id = id
         self.name = NAME
         self.ip = IP
         self.Health = HEALTH
@@ -87,6 +87,7 @@ s.settimeout(0.0001)
 
 
 def SendAllPlayersMessage(message):
+    message = f'F\n{message}'
     for client in clients:
         client.id.send(message.encode('UTF-8'))
 
@@ -120,12 +121,12 @@ def CommunicateWithPlayer(__client__):
                     __client__.Health-=25
                     UpdatePlayers()
 
-                    pMessage = "F\n"+__client__.name+" has been hurt."
+                    pMessage = __client__.name+" has been hurt."
                     time.sleep(0.1)
                     SendAllPlayersMessage(pMessage)
                     print('meeeeeeow')
                 else:
-                    pMessage = "F\n"+__client__.name+": "+m[1:]
+                    pMessage = __client__.name+": "+m[1:]
                     SendAllPlayersMessage(pMessage)
                     print(pMessage)
 
@@ -152,7 +153,7 @@ def HandleConnections():
             thread.start()
             message = 'F\n'+player.name + " has joined the game."
             print(player.name + " has connected. IP: " + str(player.ip))
-            lua.eval("OnPlayerConnect()")
+            lua.eval("OnPlayerConnect("")")
             time.sleep(1.2)
             UpdatePlayers()
         except:
