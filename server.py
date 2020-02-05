@@ -4,32 +4,36 @@ import pickle
 import time
 import math
 from configparser import ConfigParser
+import lupa
+
+print("Launching the server...")
 
 class Server:
-    def __init__(self, hostname, language, port, maxplayers, rconpassword, password):
+    def __init__(self, hostname,gamemode, language, port, maxplayers, rconpassword, password):
         self.hostname = hostname
+        self.gamemode = gamemode
         self.language = language
         self.port = port
         self.maxplayers = maxplayers
         self.rconpassword = rconpassword
         self.password = password
         print(f"{self.hostname} has been successfuly launched on {port} with {maxplayers} max player count.")
-print("Launching the server...")
 
+lua = lupa.LuaRuntime(unpack_returned_tuples=True)
 config = ConfigParser()
 
 try:
     config.read('server_config.ini')
+    shs=config.get("main", "hostname")
+    sl=config.get("main", "language")
+    sp=config.get("main", "port")
+    smp=config.get("main", "maxplayers")
+    srp=config.get("main", "rconpassword")
+    sps=config.get("main","password")
+    sgm=config.get("main","gamemode")
 except:
-    print("ERROR COULD NOT FIND server_config.ini")
+    print("Config file doesn't exist or lacks keys.")
     quit()
-
-shs=config.get("main", "hostname")
-sl=config.get("main", "language")
-sp=config.get("main", "port")
-smp=config.get("main", "maxplayers")
-srp=config.get("main", "rconpassword")
-sps=config.get("main","password")
 
 #
 SOUTH = 0
@@ -148,8 +152,8 @@ def HandleConnections():
             thread.start()
             message = 'F\n'+player.name + " has joined the game."
             print(player.name + " has connected. IP: " + str(player.ip))
-            SendAllPlayersMessage(message)
-            time.sleep(2)
+            lua.eval("OnPlayerConnect()")
+            time.sleep(1.2)
             UpdatePlayers()
         except:
             pass
@@ -157,4 +161,6 @@ def HandleConnections():
 if(__name__=='__main__'):
     ConnectionHandler = Thread(target=HandleConnections)
     ConnectionHandler.start()
-server = Server(shs,sl,sp,smp,srp,sps)
+server = Server(shs,sgm,sl,sp,smp,srp,sps)
+
+lua.execute(open(server.gamemode,'r').read())

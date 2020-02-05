@@ -77,12 +77,9 @@ textChatFont = pygame.font.SysFont('Arial',15)
 surface = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 Transparent_Surface = pygame.Surface((SCREEN_WIDTH,SCREEN_HEIGHT), pygame.SRCALPHA)
 surface.blit(Transparent_Surface, (0,0))
-
 pygame.display.set_caption("M711Dimension")
 
 playerSheet = spritesheet("george.png", 4,4)
-
-
 
 textinput = Ti.TextInput("", "none",20,True,WHITE,WHITE)
 
@@ -109,12 +106,10 @@ def gameLoop():
                         gameState = TEXTCHAT
                         time.sleep(0.3)
                         textinput.input_string  = ""
-
                 elif(event.key==pygame.K_TAB):
                     if(gameState == NORMAL or gameState == TEXTCHAT):
                         gameState = PLAYERSLIST
-                    else:
-                        gameState=NORMAL
+
                 elif(event.key == pygame.K_RETURN):
                     if(gameState == TEXTCHAT):
                         gameState = NORMAL
@@ -124,6 +119,14 @@ def gameLoop():
                         msg = msg.encode('UTF-8')
                         textinput.input_string  = ''
                         s.send(msg)
+            elif(event.type == pygame.KEYUP):
+                if(event.key == pygame.K_TAB):
+                    gameState = NORMAL
+        Transparent_Surface.fill((200, 200, 200, 10))
+
+        for checkpoint in checkpoints:
+            pygame.draw.circle(Transparent_Surface, (150,10,10,150), (100,200),20)
+
 
         for player in players:
             if(player['D'] == SOUTH):
@@ -146,19 +149,13 @@ def gameLoop():
         elif(gameState == PLAYERSLIST):
             BOX_WIDTH = 200
             BOX_HEIGHT = 300
-            pygame.draw.rect(surface, TEST,((SCREEN_WIDTH/2)-(BOX_WIDTH/2), (SCREEN_HEIGHT/2)-(BOX_HEIGHT/2), BOX_WIDTH,BOX_HEIGHT))
+            pygame.draw.rect(surface, TEST,(int((SCREEN_WIDTH/2)-(BOX_WIDTH/2)), int((SCREEN_HEIGHT/2)-(BOX_HEIGHT/2)), BOX_WIDTH,BOX_HEIGHT))
             playerlisttext = "name\t\tScore\n"
             for player in players:
                 playerlisttext+=player['name']+'\t\t'+str(player['S'])+'\n'
             ptext.draw(playerlisttext,((SCREEN_WIDTH/2)-(BOX_WIDTH/2), (SCREEN_HEIGHT/2)-(BOX_HEIGHT/2)), color=WHITE)
-        Transparent_Surface.fill((200, 200, 200, 10))
         ptext.draw(chatLog,(10,SCREEN_HEIGHT-150), color=BLUE)
-        pygame.draw.circle(Transparent_Surface, (150,10,10,150), (100,200),20)
-
         surface.blit(Transparent_Surface, (0,0))
-
-        #pygame.draw.circle(Transparent_Surface, (200,200,200,50), (0,0), 120)
-
         pygame.display.update()
         pygame.time.Clock().tick(FPS)
 def recvMessages():
