@@ -150,9 +150,9 @@ def gameLoop():
             BOX_WIDTH = 200
             BOX_HEIGHT = 300
             pygame.draw.rect(surface, TEST,(int((SCREEN_WIDTH/2)-(BOX_WIDTH/2)), int((SCREEN_HEIGHT/2)-(BOX_HEIGHT/2)), BOX_WIDTH,BOX_HEIGHT))
-            playerlisttext = "name\t\tScore\n"
+            playerlisttext = "id\tname\tScore\n"
             for player in players:
-                playerlisttext+=player['name']+'\t\t'+str(player['S'])+'\n'
+                playerlisttext+=player['id']+'\t'+player['name']+'\t'+str(player['S'])+'\n'
             ptext.draw(playerlisttext,((SCREEN_WIDTH/2)-(BOX_WIDTH/2), (SCREEN_HEIGHT/2)-(BOX_HEIGHT/2)), color=WHITE)
         ptext.draw(chatLog,(10,SCREEN_HEIGHT-150), color=BLUE)
         surface.blit(Transparent_Surface, (0,0))

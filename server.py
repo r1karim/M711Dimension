@@ -42,15 +42,12 @@ NORTH = 2
 EAST = 3
 
 def GetTheDistanceBetweenTwoPoints(x,y,x1,y1):
-    a = (x - x1)**2
-    b = (y - y1)**2
-    R = math.sqrt(a + b)
-    return R
-
+    return math.sqrt(((x-x1)**2)+((y-y1)**2))
 
 class Player:
-    def __init__(self, id,NAME, IP, HEALTH, X,Y):
-        self.id = id
+    def __init__(self, ID,IDINT,NAME, IP, HEALTH, X,Y,team,skin):
+        self.id = ID
+        self.idint=IDINT
         self.name = NAME
         self.ip = IP
         self.Health = HEALTH
@@ -58,6 +55,9 @@ class Player:
         self.y = Y
         self.score = 0
         self.direction = SOUTH
+        self.team = team
+        self.skin = skin
+        self.admin = False
     def GetPlayerPosition(self):
         return self.x,self.y
     def GetPlayerName(self):
@@ -85,83 +85,126 @@ s.bind((IP,PORT))
 s.listen(50)
 s.settimeout(0.0001)
 
-
-def SendAllPlayersMessage(message):
-    message = f'F\n{message}'
-    for client in clients:
-        client.id.send(message.encode('UTF-8'))
-
 def CommunicateWithPlayer(__client__):
     while True:
         try:
-            m = __client__.id.recv(1024)
-            m = m.decode("UTF-8")
-            if(m[0] == 'A'):
+            message = __client__.id.recv(1024).decode("UTF-8")
+            pText = message[1:]
+            if(message[0] == 'A'):
                 __client__.x+=5 #right
                 __client__.direction = EAST
                 UpdatePlayers()
 
-            elif(m[0] == 'B'):
+            elif(message[0] == 'B'):
                 __client__.x-=5 #left
                 __client__.direction = WEST
                 UpdatePlayers()
 
-            elif(m[0] == 'C'):
+            elif(message[0] == 'C'):
                 __client__.y+=5 #down
                 __client__.direction = SOUTH
                 UpdatePlayers()
 
-            elif(m[0] == 'D'):
+            elif(message[0] == 'D'):
                 __client__.y-=5 #up
                 __client__.direction = NORTH
                 UpdatePlayers()
 
-            elif(m[0] == 'E'):
-                if('/damage' in m[1:8]):
-                    __client__.Health-=25
-                    UpdatePlayers()
-
-                    pMessage = __client__.name+" has been hurt."
-                    time.sleep(0.1)
-                    SendAllPlayersMessage(pMessage)
-                    print('meeeeeeow')
-                else:
-                    pMessage = __client__.name+": "+m[1:]
+            elif(message[0] == 'E'):
+                r=lua.eval(f'OnPlayerText({__client__.idint}, {pText})')
+                if(r != -1):
+                    pMessage = f'{__client__.name}: {pText}'
                     SendAllPlayersMessage(pMessage)
                     print(pMessage)
-
         except:
             pass
+
 def UpdatePlayers():
     players = []
     for client in clients:
-        playerDict = {'type': 'player','name': client.name, 'X': client.x, 'Y':client.y, 'H':client.Health, 'S':client.score, 'D': client.direction}
+        playerDict = {'type': 'player', 'id':client.idint,'name': client.name, 'X': client.x, 'Y':client.y, 'H':client.Health, 'S':client.score, 'D': client.direction}
         players.append(playerDict)
-    for e in clients:
-        obj = pickle.dumps(players)
-        e.id.send(obj)
+    obj = pickle.dumps(players)
+    for c in clients:
+        c.id.send(obj)
+
 def HandleConnections():
     while True:
         try:
             client, address = s.accept()
             client.setblocking(0)
             name = client.recv(500)
-            player = Player(client, name.decode('UTF-8'), address, 100.0, 0, 0)
+            player = Player(client, len(clients),name.decode('UTF-8'), address, 100.0, 0, 0, 0,0)
             player.printInformation()
             clients.append(player)
             thread = Thread(target=CommunicateWithPlayer, args=[player])
             thread.start()
             message = 'F\n'+player.name + " has joined the game."
             print(player.name + " has connected. IP: " + str(player.ip))
-            lua.eval("OnPlayerConnect("")")
+            lua.eval(f"OnPlayerConnect({player.idint})")
             time.sleep(1.2)
             UpdatePlayers()
         except:
             pass
 
+#SERVER FUNCTIONS
+def SendAllPlayersMessage(message):
+    message = f'F\n{message}'
+    for client in clients:
+        client.id.send(message.encode('UTF-8'))
+
+def GetPlayerName(playerid):
+    name = ''
+    for client in clients:
+        if(client.idint == playerid):
+            name = client.name
+            break
+    return name
+
+def SendPlayerMessage(playerid,message):
+    message = f'\n{message}'
+    for client in clients:
+        if(client.idint == playerid):
+            client.id.send(message.encode('UTF-8'))
+            break
+
+def SetPlayerTeam(playerid, teamid):
+    for client in clients:
+        if(client.idint == playerid):
+            client.team = teamid
+            break
+
+def SetPlayerSkin(playerid, skinid):
+    for client in clients:
+        if(client.idint == playerid):
+            client.skin == skinid
+            break
+
+def SetPlayerAdmin(playerid, a):
+    for client in clients:
+        if(client.idint == playerid):
+            client.admin = a
+            print(f'{client.name} is now a server administrator')
+            break
+
+def KickPlayer(playerid):
+    for client in clients:
+        if(client.idint == playerid):
+            client.id.close()
+            clients.remove(client)
+            break
+def GetPlayerIp(playerid):
+    ip = ''
+    for client in clients:
+        if(client.idint == playerid):
+            ip = client.GetPlayerIp()
+            break
+    return ip
+
 if(__name__=='__main__'):
     ConnectionHandler = Thread(target=HandleConnections)
     ConnectionHandler.start()
+
 server = Server(shs,sgm,sl,sp,smp,srp,sps)
 
 lua.execute(open(server.gamemode,'r').read())
