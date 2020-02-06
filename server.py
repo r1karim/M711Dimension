@@ -193,6 +193,7 @@ def KickPlayer(playerid):
             client.id.close()
             clients.remove(client)
             break
+
 def GetPlayerIp(playerid):
     ip = ''
     for client in clients:
@@ -200,6 +201,13 @@ def GetPlayerIp(playerid):
             ip = client.GetPlayerIp()
             break
     return ip
+
+def ShowPlayerDialog(playerid, type, title, content):
+    for client in clients:
+        if(client.idint == playerid):
+            dialogcode = f'W{type}{title}|{content}'
+            client.id.send(dialogcode.encode('UTF-8'))
+            break
 
 if(__name__=='__main__'):
     ConnectionHandler = Thread(target=HandleConnections)

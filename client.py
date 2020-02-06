@@ -152,21 +152,37 @@ def gameLoop():
             pygame.draw.rect(surface, TEST,(int((SCREEN_WIDTH/2)-(BOX_WIDTH/2)), int((SCREEN_HEIGHT/2)-(BOX_HEIGHT/2)), BOX_WIDTH,BOX_HEIGHT))
             playerlisttext = "id\tname\tScore\n"
             for player in players:
-                playerlisttext+=player['id']+'\t'+player['name']+'\t'+str(player['S'])+'\n'
+                playerlisttext+=str(player['id'])+'\t'+player['name']+'\t'+str(player['S'])+'\n'
             ptext.draw(playerlisttext,((SCREEN_WIDTH/2)-(BOX_WIDTH/2), (SCREEN_HEIGHT/2)-(BOX_HEIGHT/2)), color=WHITE)
         ptext.draw(chatLog,(10,SCREEN_HEIGHT-150), color=BLUE)
         surface.blit(Transparent_Surface, (0,0))
         pygame.display.update()
         pygame.time.Clock().tick(FPS)
+
 def recvMessages():
     global chatLog
     global players
     while True:
         try:
             message = s.recv(1000)
-            temp = ''
             try:
                 temp = message.decode('UTF-8')
+                message_type = temp[0]
+                fullmessage = temp[1:]
+                if(message_type == 'F'):
+                    print(fullmessage)
+                    chatLog += temp[fullmessage]
+                elif(message_type == 'W'):
+                    dialog_type = fullmessage[0]
+                    x = -1
+                    for i in range(len(fullmessage)):
+                        if(fullmessage[i] == '|'):
+                            x = i
+                            break
+                    dialog_title = fullmessage[1:x]
+                    dialog_content = fullmessage[x+1:len(fullmessage)-1]
+                    print(f"Dialog title: {dialog_title}")
+                    print(f"Dialog content: {dialog_content}")
             except:
                 temp = pickle.loads(message)
                 plist = [] #playerlist
@@ -177,10 +193,7 @@ def recvMessages():
                     elif(t['type']=='checkpoint'):
                         cplist.append(t)
                 players = plist
-            if(temp[0] == 'F'):
-                temp = message.decode('UTF-8')
-                print(temp[1:])
-                chatLog+=temp[1:]
+
         except:
             pass
 if(__name__=='__main__'): 
