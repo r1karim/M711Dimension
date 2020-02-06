@@ -65,6 +65,7 @@ chatLog = "Welcome to M711Dimension!"
 IP = '127.0.0.1'
 PORT = 8545
 s = socket.socket()
+s.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, True)
 s.settimeout(1)
 s.connect((IP, PORT))
 print("Connected to the server.")
@@ -164,15 +165,15 @@ def recvMessages():
     global players
     while True:
         try:
-            message = s.recv(1000)
+            message = s.recv(350)
             try:
                 temp = message.decode('UTF-8')
                 message_type = temp[0]
                 fullmessage = temp[1:]
                 if(message_type == 'F'):
-                    print(fullmessage)
-                    chatLog += temp[fullmessage]
+                    chatLog += fullmessage
                 elif(message_type == 'W'):
+                    print("Received a dialog")
                     dialog_type = fullmessage[0]
                     x = -1
                     for i in range(len(fullmessage)):

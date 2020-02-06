@@ -84,7 +84,7 @@ s = socket.socket()
 s.bind((IP,PORT))
 s.listen(50)
 s.settimeout(0.0001)
-
+s.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, True)
 def CommunicateWithPlayer(__client__):
     while True:
         try:
@@ -139,7 +139,6 @@ def HandleConnections():
             clients.append(player)
             thread = Thread(target=CommunicateWithPlayer, args=[player])
             thread.start()
-            message = 'F\n'+player.name + " has joined the game."
             print(player.name + " has connected. IP: " + str(player.ip))
             lua.eval(f"OnPlayerConnect({player.idint})")
             time.sleep(1.2)
@@ -151,7 +150,7 @@ def HandleConnections():
 def SendAllPlayersMessage(message):
     message = f'F\n{message}'
     for client in clients:
-        client.id.send(message.encode('UTF-8'))
+        client.id.sendall(message.encode('UTF-8'))
 
 def GetPlayerName(playerid):
     name = ''
@@ -162,10 +161,10 @@ def GetPlayerName(playerid):
     return name
 
 def SendPlayerMessage(playerid,message):
-    message = f'\n{message}'
+    message = f'F\n{message}'
     for client in clients:
         if(client.idint == playerid):
-            client.id.send(message.encode('UTF-8'))
+            client.id.sendall(message.encode('UTF-8'))
             break
 
 def SetPlayerTeam(playerid, teamid):
@@ -203,10 +202,11 @@ def GetPlayerIp(playerid):
     return ip
 
 def ShowPlayerDialog(playerid, type, title, content):
+    time.sleep(0.1)
     for client in clients:
         if(client.idint == playerid):
-            dialogcode = f'W{type}{title}|{content}'
-            client.id.send(dialogcode.encode('UTF-8'))
+            dialogcode = f"W{type}{title}|{content}"
+            client.id.sendall(dialogcode.encode('UTF-8'))
             break
 
 if(__name__=='__main__'):
