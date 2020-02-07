@@ -59,7 +59,7 @@ Health = 100.0
 players = []
 checkpoints = []
 
-chatLog = "Welcome to M711Dimension!"
+chatLog = "Welcome to M711Dimension!\n"
 
 #Connection to the server.
 IP = '127.0.0.1'
@@ -165,25 +165,35 @@ def recvMessages():
     global players
     while True:
         try:
-            message = s.recv(350)
+            message = s.recv(1024)
             try:
-                temp = message.decode('UTF-8')
-                message_type = temp[0]
-                fullmessage = temp[1:]
-                if(message_type == 'F'):
-                    chatLog += fullmessage
-                elif(message_type == 'W'):
-                    print("Received a dialog")
-                    dialog_type = fullmessage[0]
-                    x = -1
-                    for i in range(len(fullmessage)):
-                        if(fullmessage[i] == '|'):
-                            x = i
-                            break
-                    dialog_title = fullmessage[1:x]
-                    dialog_content = fullmessage[x+1:len(fullmessage)-1]
-                    print(f"Dialog title: {dialog_title}")
-                    print(f"Dialog content: {dialog_content}")
+                message = message.decode('UTF-8')
+                print(message)
+                objectstart = []
+                objectend = []
+                for i in range(len(message)):
+                    if(message[i] == '$'):
+                        objectstart.append(i)
+                    elif(message[i] == '£'):
+                        objectend.append(i)
+                for i in range(len(objectstart)):
+                    message_type = message[objectstart[i]+1]
+                    fullmessage = message[objectstart[i]+2:objectend[i]] + '\n'
+                    if(message_type == 'F'):
+                        chatLog += fullmessage
+                    elif(message_type == 'W'):
+                        print("Received a dialog")
+                        dialog_type = fullmessage[0]
+                        x = -1
+                        for i in range(len(fullmessage)):
+                            if(fullmessage[i] == '|'):
+                                x = i
+                                break
+                        dialog_title = fullmessage[1:x]
+                        dialog_content = fullmessage[x+1:len(fullmessage)-1]
+                        print(f"Dialog type: {dialog_type}")
+                        print(f"Dialog title: {dialog_title}")
+                        print(f"Dialog content: {dialog_content}")
             except:
                 temp = pickle.loads(message)
                 plist = [] #playerlist

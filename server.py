@@ -47,7 +47,7 @@ def GetTheDistanceBetweenTwoPoints(x,y,x1,y1):
 class Player:
     def __init__(self, ID,IDINT,NAME, IP, HEALTH, X,Y,team,skin):
         self.id = ID
-        self.idint=IDINT
+        self.idint = IDINT
         self.name = NAME
         self.ip = IP
         self.Health = HEALTH
@@ -148,7 +148,7 @@ def HandleConnections():
 
 #SERVER FUNCTIONS
 def SendAllPlayersMessage(message):
-    message = f'F\n{message}'
+    message = f'$F{message}£'
     for client in clients:
         client.id.sendall(message.encode('UTF-8'))
 
@@ -161,7 +161,7 @@ def GetPlayerName(playerid):
     return name
 
 def SendPlayerMessage(playerid,message):
-    message = f'F\n{message}'
+    message = f'$F{message}£'
     for client in clients:
         if(client.idint == playerid):
             client.id.sendall(message.encode('UTF-8'))
@@ -183,7 +183,7 @@ def SetPlayerAdmin(playerid, a):
     for client in clients:
         if(client.idint == playerid):
             client.admin = a
-            print(f'{client.name} is now a server administrator')
+            print(f'{client.name} is now a server administrator.')
             break
 
 def KickPlayer(playerid):
@@ -205,7 +205,7 @@ def ShowPlayerDialog(playerid, type, title, content):
     time.sleep(0.1)
     for client in clients:
         if(client.idint == playerid):
-            dialogcode = f"W{type}{title}|{content}"
+            dialogcode = f"$W{type}{title}|{content}£"
             client.id.sendall(dialogcode.encode('UTF-8'))
             break
 
