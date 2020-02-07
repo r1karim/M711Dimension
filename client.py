@@ -61,6 +61,16 @@ checkpoints = []
 
 chatLog = "Welcome to M711Dimension!\n"
 
+dialog = {
+    'Title': '', 
+    'Content': '', 
+    'Width':0, 
+    'Height':0,
+    'Button1':'',
+    'Button2':'',
+    'switch':False
+}
+
 #Connection to the server.
 IP = '127.0.0.1'
 PORT = 8545
@@ -127,7 +137,9 @@ def gameLoop():
 
         for checkpoint in checkpoints:
             pygame.draw.circle(Transparent_Surface, (150,10,10,150), (100,200),20)
-
+        
+        if(dialog['switch'] == True):
+            pygame.draw.rect(surface, BLACK, (int((SCREEN_WIDTH/2)-(dialog['Width']/2)),int((SCREEN_HEIGHT/2)-(dialog['Height']/2)), dialog['Width'], dialog['Height']))
 
         for player in players:
             if(player['D'] == SOUTH):
@@ -194,6 +206,33 @@ def recvMessages():
                         print(f"Dialog type: {dialog_type}")
                         print(f"Dialog title: {dialog_title}")
                         print(f"Dialog content: {dialog_content}")
+                        lines = []
+                        characters = 0
+                        print("Calculations are done.0")
+
+
+                        dialog['Title'] = dialog_title
+                        dialog['Content'] = dialog_content
+                        dialog['switch'] = True
+
+                        for i in range(len(dialog_content)):
+                            print(dialog_content[i]+dialog_content[i+1])
+                            if(i < len(dialog_content)):
+                                ch = dialog_content[i]+dialog_content[i+1]
+                            if (ch == '\n'):
+                                lines.append(characters)
+                                characters = 0
+                                print("meow")
+                            else:
+                                characters += 1
+                        lines.append(characters)
+                        
+                        print("Calculations are done.2")
+
+                        dialog['Height'] = len(lines) * 8
+                        lines.sort(reverse = True)
+                        dialog['Width'] = len(lines[0])*8
+                        print("Calculations are done.3")
             except:
                 temp = pickle.loads(message)
                 plist = [] #playerlist

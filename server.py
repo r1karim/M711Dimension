@@ -134,15 +134,20 @@ def HandleConnections():
             client, address = s.accept()
             client.setblocking(0)
             name = client.recv(500)
-            player = Player(client, len(clients),name.decode('UTF-8'), address, 100.0, 0, 0, 0,0)
-            player.printInformation()
-            clients.append(player)
-            thread = Thread(target=CommunicateWithPlayer, args=[player])
-            thread.start()
-            print(player.name + " has connected. IP: " + str(player.ip))
-            lua.eval(f"OnPlayerConnect({player.idint})")
-            time.sleep(1.2)
-            UpdatePlayers()
+            for p in clients:
+                if(p.name == name):
+                    client.close()
+                    break
+            else:
+                player = Player(client, len(clients),name.decode('UTF-8'), address, 100.0, 15, 15, 0,0)
+                player.printInformation()
+                clients.append(player)
+                thread = Thread(target=CommunicateWithPlayer, args=[player])
+                thread.start()
+                print(player.name + " has connected. IP: " + str(player.ip))
+                lua.eval(f"OnPlayerConnect({player.idint})")
+                time.sleep(1.2)
+                UpdatePlayers()
         except:
             pass
 
