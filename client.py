@@ -138,8 +138,11 @@ def gameLoop():
         for checkpoint in checkpoints:
             pygame.draw.circle(Transparent_Surface, (150,10,10,150), (100,200),20)
         
-        if(dialog['switch'] == True):
+        if(dialog['switch']):
             pygame.draw.rect(surface, BLACK, (int((SCREEN_WIDTH/2)-(dialog['Width']/2)),int((SCREEN_HEIGHT/2)-(dialog['Height']/2)), dialog['Width'], dialog['Height']))
+            pygame.draw.rect(surface, BLUE, (int((SCREEN_WIDTH/2)-(dialog['Width']/2)),int((SCREEN_HEIGHT/2)-(dialog['Height']/2)), dialog['Width'], 20))
+            ptext.draw(dialog['Title'], (int((SCREEN_WIDTH/2)-(dialog['Width']/2)),int((SCREEN_HEIGHT/2)-(dialog['Height']/2)+3)), color=BLACK)
+            ptext.draw(dialog['Content'], (int((SCREEN_WIDTH/2)-(dialog['Width']/2)),int((SCREEN_HEIGHT/2)-(dialog['Height']/2)+23)), color=WHITE, fontsize=20)
 
         for player in players:
             if(player['D'] == SOUTH):
@@ -208,31 +211,30 @@ def recvMessages():
                         print(f"Dialog content: {dialog_content}")
                         lines = []
                         characters = 0
-                        print("Calculations are done.0")
-
 
                         dialog['Title'] = dialog_title
                         dialog['Content'] = dialog_content
                         dialog['switch'] = True
 
                         for i in range(len(dialog_content)):
-                            print(dialog_content[i]+dialog_content[i+1])
-                            if(i < len(dialog_content)):
+                            if(i < len(dialog_content)-1):
                                 ch = dialog_content[i]+dialog_content[i+1]
-                            if (ch == '\n'):
+                            else:
+                                ch='__'
+                            if (ch == 't\n'):
+                                print("meow0")
                                 lines.append(characters)
                                 characters = 0
-                                print("meow")
+                                print("meow1")
                             else:
                                 characters += 1
                         lines.append(characters)
-                        
-                        print("Calculations are done.2")
 
-                        dialog['Height'] = len(lines) * 8
+
+                        dialog['Height'] = (len(lines) * 10) + 90
                         lines.sort(reverse = True)
-                        dialog['Width'] = len(lines[0])*8
-                        print("Calculations are done.3")
+                        dialog['Width'] = lines[0]*10
+
             except:
                 temp = pickle.loads(message)
                 plist = [] #playerlist
