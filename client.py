@@ -66,8 +66,16 @@ dialog = {
     'Content': '', 
     'Width':0, 
     'Height':0,
-    'Button1':'',
-    'Button2':'',
+    'Button1': {
+        'value': '',
+        'Width': 0,
+        'Height': 0,
+    },
+    'Button2': {
+        'value': '',
+        'Width': 0,
+        'Height': 0,
+    },
     'switch':False
 }
 
@@ -143,7 +151,9 @@ def gameLoop():
             pygame.draw.rect(surface, BLUE, (int((SCREEN_WIDTH/2)-(dialog['Width']/2)),int((SCREEN_HEIGHT/2)-(dialog['Height']/2)), dialog['Width'], 20))
             ptext.draw(dialog['Title'], (int((SCREEN_WIDTH/2)-(dialog['Width']/2)),int((SCREEN_HEIGHT/2)-(dialog['Height']/2)+3)), color=BLACK)
             ptext.draw(dialog['Content'], (int((SCREEN_WIDTH/2)-(dialog['Width']/2)),int((SCREEN_HEIGHT/2)-(dialog['Height']/2)+23)), color=WHITE, fontsize=20)
-
+            if(dialog['Button2']['value'] == ''):
+                pygame.draw.rect(surface, BLUE, (int((SCREEN_WIDTH/2) - int(dialog['Button1']['Width']/2)),int((SCREEN_HEIGHT/2)+(dialog['Height']/2)-30), dialog['Button1']['Width'],dialog['Button1']['Height']))
+                ptext.draw(dialog['Button1']['value'],(int((SCREEN_WIDTH/2) - int(dialog['Button1']['Width'] /2)),int((SCREEN_HEIGHT/2)+(dialog['Height']/2)-27)), color=WHITE)
         for player in players:
             if(player['D'] == SOUTH):
                 playerSheet.draw(surface,0,player['X'], player['Y'])
@@ -153,7 +163,6 @@ def gameLoop():
                 playerSheet.draw(surface,3,player['X'], player['Y'])
             elif(player['D'] == NORTH):
                 playerSheet.draw(surface,2,player['X'], player['Y'])
-
             pygame.draw.rect(surface, BLACK, (player['X'], player['Y']-10, 50,9))
             pygame.draw.rect(surface, RED, (player['X'], player['Y']-10, int(player['H']/2),9))
             textsurface = myfont.render(player['name'], False, WHITE)
@@ -193,48 +202,50 @@ def recvMessages():
                         objectend.append(i)
                 for i in range(len(objectstart)):
                     message_type = message[objectstart[i]+1]
-                    fullmessage = message[objectstart[i]+2:objectend[i]] + '\n'
+                    fullmessage = message[objectstart[i]+2:objectend[i]]
                     if(message_type == 'F'):
-                        chatLog += fullmessage
+                        chatLog += fullmessage + '\n'
                     elif(message_type == 'W'):
                         print("Received a dialog")
                         dialog_type = fullmessage[0]
-                        x = -1
+                        x = []
                         for i in range(len(fullmessage)):
-                            if(fullmessage[i] == '|'):
-                                x = i
-                                break
-                        dialog_title = fullmessage[1:x]
-                        dialog_content = fullmessage[x+1:len(fullmessage)-1]
+                            if(fullmessage[i] == '語'):
+                                x.append(i)
+                                continue
+                        dialog_title = fullmessage[1:x[0]]
+                        dialog_content = fullmessage[x[0]+1:x[1]]
+                        dialog_button1 = fullmessage[x[1]+1:x[2]]
+                        dialog_button2 = fullmessage[x[2]+1:]
                         print(f"Dialog type: {dialog_type}")
                         print(f"Dialog title: {dialog_title}")
                         print(f"Dialog content: {dialog_content}")
+                        print(f"dialog button1: {dialog_button1}")
+                        print(f"dialog button2: {dialog_button2}")
                         lines = []
                         characters = 0
-
+                        print("test")
                         dialog['Title'] = dialog_title
                         dialog['Content'] = dialog_content
                         dialog['switch'] = True
-
+                        dialog['Button1']['value'] = dialog_button1
+                        dialog['Button1']['Width'] = len(dialog['Button1']['value']) * 10 + 2
+                        dialog['Button1']['Height'] = 20
+                        dialog['Button2']['value'] = dialog_button2
                         for i in range(len(dialog_content)):
                             if(i < len(dialog_content)-1):
                                 ch = dialog_content[i]+dialog_content[i+1]
                             else:
                                 ch='__'
                             if (ch == 't\n'):
-                                print("meow0")
                                 lines.append(characters)
                                 characters = 0
-                                print("meow1")
                             else:
                                 characters += 1
                         lines.append(characters)
-
-
                         dialog['Height'] = (len(lines) * 10) + 90
                         lines.sort(reverse = True)
                         dialog['Width'] = lines[0]*10
-
             except:
                 temp = pickle.loads(message)
                 plist = [] #playerlist

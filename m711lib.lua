@@ -14,6 +14,6 @@ end
 function SetPlayerTeam(playerid, teamid)
 	--pass
 end
-function ShowPlayerDialog(playerid, type, title, content, button1, button2='')
+function ShowPlayerDialog(playerid, type, title, content, button1, button2)
 	python.eval(string.format("ShowPlayerDialog(%d, %d,'%s', '%s','%s','%s')", playerid, type, title, content,button1,button2))
 end

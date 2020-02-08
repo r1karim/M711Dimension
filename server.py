@@ -210,7 +210,7 @@ def ShowPlayerDialog(playerid, type, title, content,button1,button2):
     time.sleep(0.1)
     for client in clients:
         if(client.idint == playerid):
-            dialogcode = f"$W{type}{title}|{content}|{button1}|{button2}£"
+            dialogcode = f"$W{type}{title}語{content}語{button1}語{button2}£"
             client.id.sendall(dialogcode.encode('UTF-8'))
             break
 
