@@ -70,11 +70,15 @@ dialog = {
         'value': '',
         'Width': 0,
         'Height': 0,
+        'PosX': -1,
+        'PosY': -1,
     },
     'Button2': {
         'value': '',
         'Width': 0,
         'Height': 0,
+        'posX': -1,
+        'posY': -1,
     },
     'switch':False
 }
@@ -111,6 +115,14 @@ def gameLoop():
             if(event.type == pygame.QUIT):
                 pygame.quit()
                 sys.exit()
+            elif event.type == pygame.MOUSEBUTTONUP:
+                x,y = pygame.mouse.get_pos()
+                if(dialog['switch']):
+                    if(dialog['Button2']['value'] == ''):
+                        if(dialog['Button1']['PosX'] <= x and dialog['Button1']['PosX']+dialog['Button1']['Width'] >= x):
+                            if(dialog['Button1']['PosY'] <= y and dialog['Button1']['PosY']+dialog['Button1']['Height'] >= y):
+                                #s.send('R')
+                                pass
             elif(event.type == pygame.KEYDOWN):
                 if(event.key == pygame.K_RIGHT):
                     s.send('A'.encode('UTF-8'))
@@ -152,8 +164,9 @@ def gameLoop():
             ptext.draw(dialog['Title'], (int((SCREEN_WIDTH/2)-(dialog['Width']/2)),int((SCREEN_HEIGHT/2)-(dialog['Height']/2)+3)), color=BLACK)
             ptext.draw(dialog['Content'], (int((SCREEN_WIDTH/2)-(dialog['Width']/2)),int((SCREEN_HEIGHT/2)-(dialog['Height']/2)+23)), color=WHITE, fontsize=20)
             if(dialog['Button2']['value'] == ''):
-                pygame.draw.rect(surface, BLUE, (int((SCREEN_WIDTH/2) - int(dialog['Button1']['Width']/2)),int((SCREEN_HEIGHT/2)+(dialog['Height']/2)-30), dialog['Button1']['Width'],dialog['Button1']['Height']))
-                ptext.draw(dialog['Button1']['value'],(int((SCREEN_WIDTH/2) - int(dialog['Button1']['Width'] /2)),int((SCREEN_HEIGHT/2)+(dialog['Height']/2)-27)), color=WHITE)
+                pygame.draw.rect(surface, BLUE, (dialog['Button1']['PosX'],dialog['Button1']['PosY'], dialog['Button1']['Width'],dialog['Button1']['Height']))
+                ptext.draw(dialog['Button1']['value'],(int((SCREEN_WIDTH/2) - int(dialog['Button1']['Width']/2)),int((SCREEN_HEIGHT/2)+(dialog['Height']/2)-27)), color=WHITE)
+                
         for player in players:
             if(player['D'] == SOUTH):
                 playerSheet.draw(surface,0,player['X'], player['Y'])
@@ -208,17 +221,19 @@ def recvMessages():
                     elif(message_type == 'W'):
                         print("Received a dialog")
                         dialog_type = fullmessage[0]
+                        dialog_id = fullmessage[1]
                         x = []
                         for i in range(len(fullmessage)):
                             if(fullmessage[i] == '語'):
                                 x.append(i)
                                 continue
-                        dialog_title = fullmessage[1:x[0]]
+                        dialog_title = fullmessage[2:x[0]]
                         dialog_content = fullmessage[x[0]+1:x[1]]
                         dialog_button1 = fullmessage[x[1]+1:x[2]]
                         dialog_button2 = fullmessage[x[2]+1:]
                         print(f"Dialog type: {dialog_type}")
                         print(f"Dialog title: {dialog_title}")
+                        print(f"Dialog ID: {dialog_id}")
                         print(f"Dialog content: {dialog_content}")
                         print(f"dialog button1: {dialog_button1}")
                         print(f"dialog button2: {dialog_button2}")
@@ -230,6 +245,8 @@ def recvMessages():
                         dialog['switch'] = True
                         dialog['Button1']['value'] = dialog_button1
                         dialog['Button1']['Width'] = len(dialog['Button1']['value']) * 10 + 2
+                        dialog['Button1']['PosX'] = int((SCREEN_WIDTH/2) - int(dialog['Button1']['Width']/2))
+                        dialog['Button1']['PosY'] = int((SCREEN_HEIGHT/2)+(dialog['Height']/2) +20)
                         dialog['Button1']['Height'] = 20
                         dialog['Button2']['value'] = dialog_button2
                         for i in range(len(dialog_content)):
