@@ -17,20 +17,22 @@ MASTER_LIST_PORT = 56871
 
 s = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
 s.bind(('127.0.0.1', 60310))
-bytes = '$__J711__$_4EVA'.encode('UTF-8')
+bytes_ = '$__J711__$_4EVA'.encode('UTF-8')
 servers = []
 
 def RefreshList():
 	global servers
-	s.sendto(bytes, (MASTER_LIST_IP, MASTER_LIST_PORT))
+	s.sendto(bytes_, (MASTER_LIST_IP, MASTER_LIST_PORT))
 	print('Sent bytes...')
-	r = s.recvfrom(3000)
+	_bytes_,addr = s.recvfrom(1024)
 	print('Received bytes...')
-	servers = pickle.loads(r)
+	print(_bytes_)
+	servers = pickle.loads(_bytes_)
 	print('Loaded bytes...')
 	print(servers)
 def gameloop():
 	while True:
+		events = pygame.event.get()
 		for event in events:
 			if(event.type == pygame.QUIT):
 				pygame.quit()
