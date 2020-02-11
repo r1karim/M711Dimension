@@ -13,7 +13,19 @@ function GetPlayerName(playerid)
 	return name
 end
 function SetPlayerTeam(playerid, teamid)
-	--pass
+	python.eval(string.format("SetPlayerTeam(%d, %d)", playerid, teamid))
+end
+function SetPlayerSkin(playerid, skinid)
+	python.eval(string.format("SetPlayerSkin(%d,%d)", playerid, skinid))
+end
+function SetPlayerAdmin(playerid, a) -- 1 = admin
+	python.eval(string.format("SetPlayerAdmin(%d, %d)", playerid, a))
+end
+function KickPlayer(playerid)
+	python.eval(string.format("KickPlayer(%d)", playerid))
+end
+function GetPlayerIp(playerid)
+	return python.eval(string.format("GetPlayerIp(%d)", playerid))
 end
 function ShowPlayerDialog(playerid, type, dialogid,title, content, button1, button2)
 	python.eval(string.format("ShowPlayerDialog(%d, %d,%d,'%s', '%s','%s','%s')", playerid, type, dialogid,title, content,button1,button2))

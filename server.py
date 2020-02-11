@@ -26,8 +26,8 @@ try:
     config.read('server_config.ini')
     shs=config.get("main", "hostname")
     sl=config.get("main", "language")
-    sp=config.get("main", "port")
-    smp=config.get("main", "maxplayers")
+    sp=int(config.get("main", "port"))
+    smp=int(config.get("main", "maxplayers"))
     srp=config.get("main", "rconpassword")
     sps=config.get("main","password")
     sgm=config.get("main","gamemode")
@@ -76,15 +76,26 @@ class Player:
             return True
         else:
             return False
+
+MASTER_LIST_IP = '127.0.0.1'
+MASTER_LIST_PORT = 56871
+
 clients = []
 
 IP = '127.0.0.1'
-PORT = 8545
+PORT = sp
 s = socket.socket()
 s.bind((IP,PORT))
 s.listen(50)
 s.settimeout(0.0001)
 s.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, True)
+
+server = Server(shs,sgm,sl,sp,smp,srp,sps)
+
+UDP_SERVER = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
+UDP_SERVER.bind((IP,PORT))
+
+
 def CommunicateWithPlayer(__client__):
     while True:
         try:
@@ -150,6 +161,13 @@ def HandleConnections():
                 UpdatePlayers()
         except:
             pass
+def masterlist():
+    while True:
+        _bytes_ = ('$'+server.hostname+'$'+server.gamemode+'$'+server.language+'$'+str(server.maxplayers))
+        try:
+            UDP_SERVER.sendto(_bytes_.encode('UTF-8'),(MASTER_LIST_IP,MASTER_LIST_PORT))
+        except:
+            pass
 
 #SERVER FUNCTIONS
 def SendAllPlayersMessage(message):
@@ -187,7 +205,7 @@ def SetPlayerSkin(playerid, skinid):
 def SetPlayerAdmin(playerid, a):
     for client in clients:
         if(client.idint == playerid):
-            client.admin = a
+            client.admin = a #1 = is admin
             print(f'{client.name} is now a server administrator.')
             break
 
@@ -216,8 +234,8 @@ def ShowPlayerDialog(playerid, dialogid,type, title, content,button1,button2):
 
 if(__name__=='__main__'):
     ConnectionHandler = Thread(target=HandleConnections)
+    masterlistHandler = Thread(target=masterlist)
     ConnectionHandler.start()
-
-server = Server(shs,sgm,sl,sp,smp,srp,sps)
+    masterlistHandler.start()
 
 lua.execute(open(server.gamemode,'r').read())
