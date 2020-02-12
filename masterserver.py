@@ -8,14 +8,6 @@ PORT = 56871
 sock = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
 sock.bind((IP,PORT))
 
-server = {
-	'hostname': '',
-	'IP': '',
-	'PORT': -1,
-	'Gamemode': '',
-	'maxplayers': 0,
-	'language': ''
-}
 servers = []
 
 def com():
@@ -30,6 +22,14 @@ def com():
 					_object_ = pickle.dumps(servers)
 					sock.sendto(_object_, (addr))
 				else:
+					server = {
+						'hostname': '',
+						'IP': '',
+						'PORT': -1,
+						'Gamemode': '',
+						'maxplayers': 0,
+						'language': ''
+					}
 					separators = []
 					server_ip = addr[0]
 					server_port = addr[1]

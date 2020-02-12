@@ -1,9 +1,19 @@
 import pygame,sys
 import socket
 import pickle
+from Libraries import ptext
 
-SCREEN_WIDTH = 500
-SCREEN_HEIGHT = 400
+
+BLACK = (0,0,0)
+WHITE = (255,255,255)
+GREEN = (52, 235, 101)
+RED = (150,10,10)
+BLUE = (10,10,150)
+LIGHTBLUE = (3, 127, 252)
+GREY = (54, 54, 59)
+
+SCREEN_WIDTH = 650
+SCREEN_HEIGHT = 450
 FPS = 30
 
 pygame.init()
@@ -23,21 +33,27 @@ servers = []
 def RefreshList():
 	global servers
 	s.sendto(bytes_, (MASTER_LIST_IP, MASTER_LIST_PORT))
-	print('Sent bytes...')
 	_bytes_,addr = s.recvfrom(1024)
-	print('Received bytes...')
-	print(_bytes_)
 	servers = pickle.loads(_bytes_)
-	print('Loaded bytes...')
 	print(servers)
 def gameloop():
 	while True:
+		surface.fill(GREY)
+
 		events = pygame.event.get()
 		for event in events:
 			if(event.type == pygame.QUIT):
 				pygame.quit()
-		surface.fill((255,255,255))
-		pygame.draw.rect(surface, (255,255,255),(100,100,100,100))
+		pygame.draw.rect(surface, LIGHTBLUE, (10,10, SCREEN_WIDTH-200, 25))
+		ptext.draw('hostname\tplayers', (12,12), fontsize=25)
+		for srv in servers:
+			serverid = servers.index(srv) + 1
+			pygame.draw.rect(surface, LIGHTBLUE, (10,10 + (serverid*30),SCREEN_WIDTH-200,25))
+			ptext.draw(srv['hostname']+'\t0/'+str(srv['maxplayers']), (14, 14 + (serverid*30)), fontsize=20)
+		pygame.draw.rect(surface, GREEN, (30 + SCREEN_WIDTH-200,10, 100,25))
+		ptext.draw('Play', (SCREEN_WIDTH-140, 14), fontsize=22)
+		pygame.draw.rect(surface, GREEN, (30 + SCREEN_WIDTH-200,40, 100,25))
+		ptext.draw('Refresh list', (SCREEN_WIDTH-165, 45))
 		pygame.display.update()
 		pygame.time.Clock().tick(FPS)
 
