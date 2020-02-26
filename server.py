@@ -5,8 +5,16 @@ import time
 import math
 from configparser import ConfigParser
 import lupa
+from datetime import datetime
 
-print("Launching the server...")
+
+
+def printt(message):
+    now = datetime.now()
+    current_time = now.strftime("%H:%M:%S")
+    print('['+current_time+']', message)
+
+printt("Launching the server...")
 
 class Server:
     def __init__(self, hostname,gamemode, language, port, maxplayers, rconpassword, password):
@@ -78,7 +86,7 @@ class Player:
             return False
 
 MASTER_LIST_IP = '127.0.0.1'
-MASTER_LIST_PORT = 56871
+MASTER_LIST_PORT = 65034
 
 clients = []
 
@@ -166,6 +174,7 @@ def masterlist():
         _bytes_ = ('$'+server.hostname+'$'+server.gamemode+'$'+server.language+'$'+str(server.maxplayers))
         try:
             UDP_SERVER.sendto(_bytes_.encode('UTF-8'),(MASTER_LIST_IP,MASTER_LIST_PORT))
+            time.sleep(1)
         except:
             pass
 

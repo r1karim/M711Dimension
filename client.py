@@ -1,4 +1,4 @@
-import pygame,sys
+﻿import pygame,sys
 import socket
 from random import*
 from threading import Thread
@@ -85,7 +85,7 @@ dialog = {
 
 #Connection to the server.
 IP = '127.0.0.1'
-PORT = 8545
+PORT = 5241
 s = socket.socket()
 s.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, True)
 s.settimeout(1)
@@ -103,7 +103,7 @@ surface.blit(Transparent_Surface, (0,0))
 pygame.display.set_caption("M711Dimension")
 
 playerSheet = spritesheet("george.png", 4,4)
-
+terrain = spritesheet("PathAndObjects.png", 6,6)
 textinput = Ti.TextInput("", "none",20,True,WHITE,WHITE)
 
 def gameLoop():
@@ -121,7 +121,6 @@ def gameLoop():
                     if(dialog['Button2']['value'] == ''):
                         if(dialog['Button1']['PosX'] <= x and dialog['Button1']['PosX']+dialog['Button1']['Width'] >= x):
                             if(dialog['Button1']['PosY'] <= y and dialog['Button1']['PosY']+dialog['Button1']['Height'] >= y):
-                                #s.send('R')
                                 pass
             elif(event.type == pygame.KEYDOWN):
                 if(event.key == pygame.K_RIGHT):
@@ -166,7 +165,7 @@ def gameLoop():
             if(dialog['Button2']['value'] == ''):
                 pygame.draw.rect(surface, BLUE, (dialog['Button1']['PosX'],dialog['Button1']['PosY'], dialog['Button1']['Width'],dialog['Button1']['Height']))
                 ptext.draw(dialog['Button1']['value'],(int((SCREEN_WIDTH/2) - int(dialog['Button1']['Width']/2)),int((SCREEN_HEIGHT/2)+(dialog['Height']/2)-27)), color=WHITE)
-                
+
         for player in players:
             if(player['D'] == SOUTH):
                 playerSheet.draw(surface,0,player['X'], player['Y'])

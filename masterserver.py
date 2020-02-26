@@ -4,7 +4,7 @@ import pickle
 from threading import Thread
 from datetime import datetime
 IP = '127.0.0.1'
-PORT = 56871
+PORT = 65034
 sock = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
 sock.bind((IP,PORT))
 
@@ -12,7 +12,7 @@ servers = []
 
 def com():
 	while True:
-		x= time() + 10
+		x= time() + 2
 		srvs = []
 		while(time() < x):
 			try:
@@ -51,6 +51,7 @@ def com():
 							break
 					else:
 						srvs.append(server)
+						print(server)
 			except:
 				pass
 		servers = srvs
