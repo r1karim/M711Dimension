@@ -1,3 +1,9 @@
+'''
+    M711Dimension - Server
+    Author: adri711
+    Language: Python
+'''
+
 import socket
 from threading import Thread
 import pickle

@@ -1,8 +1,15 @@
+'''
+	M711Dimension - Master server
+	Author: adri711
+	Language: Python
+'''
+
 import socket
 from time import time
 import pickle
 from threading import Thread
 from datetime import datetime
+
 IP = '127.0.0.1'
 PORT = 65034
 sock = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)

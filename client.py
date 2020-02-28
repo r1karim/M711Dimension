@@ -1,4 +1,10 @@
-﻿import pygame,sys
+﻿'''
+    M711Dimension - Client
+    Author: adri711
+    Language: Python
+'''
+
+import pygame,sys
 import socket
 from random import*
 from threading import Thread

@@ -1,3 +1,9 @@
+'''
+	M711Dimension - Launcher
+	Author: adri711
+	Language: Python
+'''
+
 import pygame,sys
 import socket
 import pickle
@@ -17,14 +23,15 @@ class widget:
 		widget.widgets.append(self)
 
 class Button(widget):
-	def __init__(self,ID,x,y,width, height, text,color):
+	def __init__(self,ID,x,y,width, height, text,color,hovercolor=None):
 		super().__init__(ID,x,y,width,height)
 		self.text = text
 		self.color = color
 		self.type = 'button'
+		self.hovercolor = hovercolor
 
 class Textarea(widget):
-	def __init__(self,ID,x,y,width, height, pholder,maxlen,txtcolor, bgcolor):
+	def __init__(self,ID,x,y,width, height, pholder,maxlen,txtcolor, bgcolor,hovercolor=None):
 		super().__init__(ID,x,y,width,height)
 		self.placeholder = pholder
 		self.maxlength = maxlen
@@ -32,7 +39,8 @@ class Textarea(widget):
 		self.color = bgcolor
 		self.text = ''
 		self.type = 'textarea'
-		
+		self.hovercolor = hovercolor
+
 BLACK = (0,0,0)
 WHITE = (255,255,255)
 GREEN = (52, 235, 101)
@@ -69,18 +77,17 @@ def RefreshList():
 		print('ERROR: Could not contact the master server.')
 
 def gameloop():
-	playButton = Button('play_button', 30 + SCREEN_WIDTH-200,10, 100,25, 'Play',GREEN)
-	refreshButton = Button('refresh_button', 30 + SCREEN_WIDTH-200,40, 100,25, 'Refresh',GREEN)
+	playButton = Button('play_button', 30 + SCREEN_WIDTH-200,10, 100,25, 'Play',GREEN,BLACK)
+	refreshButton = Button('refresh_button', 30 + SCREEN_WIDTH-200,40, 100,25, 'Refresh',GREEN,BLACK)
 
 	while True:
 		surface.fill(GREY)
+		x,y = pygame.mouse.get_pos()
 		events = pygame.event.get()
 		for event in events:
 			if event.type == pygame.QUIT:
 				pygame.quit()
 			elif event.type == pygame.MOUSEBUTTONUP:
-				x,y = pygame.mouse.get_pos()
-
 				for wdgt in widget.widgets:
 					if wdgt.type == 'button':
 						if x >= wdgt.x and x <= wdgt.x + wdgt.width and y >= wdgt.y and y <= wdgt.y+wdgt.height:
@@ -92,17 +99,24 @@ def gameloop():
 					elif wdgt.type == 'textarea':
 						if x >= wdgt.x and x <= wdgt.x+wdgt.width and y >= wdgt.y and y <= wdgt.y + wdgt.height:
 							wdgt.isSelected = True
-
+						else:
+							wdgt.isSelected = False
 		pygame.draw.rect(surface, LIGHTBLUE, (10,40, SCREEN_WIDTH-200, 25))
 		ptext.draw('hostname\tplayers', (12,42), fontsize=25)
 		for wdgt in widget.widgets:
-			if(wdgt.type == 'button'):
-				pygame.draw.rect(surface, wdgt.color, (wdgt.x,wdgt.y, wdgt.width, wdgt.height))
+			if wdgt.type == 'button':
+				if wdgt.hovercolor is None:
+					pygame.draw.rect(surface, wdgt.color, (wdgt.x,wdgt.y, wdgt.width, wdgt.height))
+				else:
+					if x >= wdgt.x and x <= wdgt.x+wdgt.width and y >= wdgt.y and y <= wdgt.y + wdgt.height:
+						pygame.draw.rect(surface, wdgt.hovercolor, (wdgt.x,wdgt.y, wdgt.width, wdgt.height))
+					else:
+						pygame.draw.rect(surface, wdgt.color, (wdgt.x,wdgt.y, wdgt.width, wdgt.height))
 				ptext.draw(wdgt.text, (wdgt.x+int(wdgt.width/4), wdgt.y+ int(wdgt.height / 4)))
-			elif(wdgt.type == 'textarea'):
+			elif wdgt.type == 'textarea':
 				pygame.draw.rect(surface, wdgt.color, (wdgt.x, wdgt.y, wdgt.width, wdgt.height))
 				ptext.draw(wdgt.text, (wdgt.x + int(wdgt.width/4), wdgt.y + int(wdgt.height/4)))
-				if wdgt.isSelected == False:
+				if not wdgt.isSelected:
 					ptext.draw(wdgt.placeholder, (wdgt.x + int(wdgt.width/5), wdgt.y + int(wdgt.height/4)), color=GREEN, fontsize=20)
 				else:
 					pass
