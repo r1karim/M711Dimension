@@ -27,6 +27,6 @@ end
 function GetPlayerIp(playerid)
 	return python.eval(string.format("GetPlayerIp(%d)", playerid))
 end
-function ShowPlayerDialog(playerid, type, dialogid,title, content, button1, button2)
+function ShowPlayerDialog(playerid, type, dialogid,title, content, button1, button2) -- The dialog id has to be only one character.
 	python.eval(string.format("ShowPlayerDialog(%d, %d,%d,'%s', '%s','%s','%s')", playerid, type, dialogid,title, content,button1,button2))
 end

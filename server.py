@@ -12,6 +12,7 @@ import math
 from configparser import ConfigParser
 import lupa
 from datetime import datetime
+import os
 
 
 
@@ -47,7 +48,7 @@ try:
     sgm=config.get("main","gamemode")
 except:
     print("Config file doesn't exist or lacks keys.")
-    quit()
+    os._exit(0)
 
 #
 SOUTH = 0
@@ -99,9 +100,9 @@ clients = []
 IP = '127.0.0.1'
 PORT = sp
 s = socket.socket()
-s.bind((IP,PORT))
+s.bind(('',PORT))
 s.listen(50)
-s.settimeout(0.0001)
+s.settimeout(1)
 s.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, True)
 
 server = Server(shs,sgm,sl,sp,smp,srp,sps)
@@ -110,37 +111,39 @@ UDP_SERVER = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
 UDP_SERVER.bind((IP,PORT))
 
 
-def CommunicateWithPlayer(__client__):
+def CommunicateWithPlayer(user):
     while True:
         try:
-            message = __client__.id.recv(1024).decode("UTF-8")
-            pText = message[1:]
-            if(message[0] == 'A'):
-                __client__.x+=5 #right
-                __client__.direction = EAST
-                UpdatePlayers()
-
-            elif(message[0] == 'B'):
-                __client__.x-=5 #left
-                __client__.direction = WEST
-                UpdatePlayers()
-
-            elif(message[0] == 'C'):
-                __client__.y+=5 #down
-                __client__.direction = SOUTH
-                UpdatePlayers()
-
-            elif(message[0] == 'D'):
-                __client__.y-=5 #up
-                __client__.direction = NORTH
-                UpdatePlayers()
-
-            elif(message[0] == 'E'):
-                r=lua.eval(f'OnPlayerText({__client__.idint}, {pText})')
-                if(r != -1):
-                    pMessage = f'{__client__.name}: {pText}'
+            message = user.id.recv(1024).decode("UTF-8")
+            Type = message[0]
+            FullMessage = message[1:]
+            if Type == 'A':
+                user.x+=5 #right
+                user.direction = EAST
+            elif Type == 'B':
+                user.x-=5
+                user.direction = WEST
+            elif Type == 'C':
+                user.y+=5
+                user.direction = SOUTH
+            elif Type == 'D':
+                user.y-=5
+                user.direction = NORTH
+            elif Type == 'E':
+                result=lua.eval(f'OnPlayerText({user.idint}, {FullMessage})')
+                if(result != -1):
+                    pMessage = f'{user.name}: {FullMessage}'
                     SendAllPlayersMessage(pMessage)
                     print(pMessage)
+            elif Type == 'G':
+                temp = []
+                for i in range(len(FullMessage)):
+                    if FullMessage[i] == '£':
+                        temp.append(i)
+                dialog_id = FullMessage[temp[0]+1]
+                dialog_response = FullMessage[temp[1]+1]
+                lua.eval(f'OnDialogResponse({user.idint}, {dialog_id}, {dialog_response})')
+            UpdatePlayers()
         except:
             pass
 
@@ -157,8 +160,8 @@ def HandleConnections():
     while True:
         try:
             client, address = s.accept()
-            client.setblocking(0)
-            name = client.recv(500)
+            client.setblocking(1)
+            name = client.recv(620)
             for p in clients:
                 if(p.name == name):
                     client.close()
@@ -171,7 +174,7 @@ def HandleConnections():
                 thread.start()
                 print(player.name + " has connected. IP: " + str(player.ip))
                 lua.eval(f"OnPlayerConnect({player.idint})")
-                time.sleep(1.2)
+                time.sleep(1.20)
                 UpdatePlayers()
         except:
             pass

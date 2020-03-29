@@ -58,7 +58,7 @@ SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 600
 FPS = 60
 #
-name = "player" + str(randint(0, 10000) + randint(0, 100))
+name = "user" + str(randint(100, 999))
 X, Y = 0.0, 0.0
 Health = 100.0
 
@@ -68,7 +68,8 @@ checkpoints = []
 chatLog = "Welcome to M711Dimension!\n"
 
 dialog = {
-    'Title': '', 
+    'Title': '',
+    'id': '',
     'Content': '', 
     'Width':0, 
     'Height':0,
@@ -83,21 +84,26 @@ dialog = {
         'value': '',
         'Width': 0,
         'Height': 0,
-        'posX': -1,
-        'posY': -1,
+        'PosX': -1,
+        'PosY': -1,
     },
     'switch':False
 }
 
 #Connection to the server.
+#IP = '127.0.0.1'
 IP = '127.0.0.1'
-PORT = 5241
-s = socket.socket()
-s.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, True)
-s.settimeout(1)
-s.connect((IP, PORT))
-print("Connected to the server.")
-s.send(name.encode('UTF-8'))
+PORT = 7777
+
+try:
+    s = socket.socket()
+    s.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, True)
+    s.settimeout(5)
+    s.connect((IP, PORT))
+    print("Connected to the server.")
+    s.send(name.encode('UTF-8'))
+except:
+    print('Connection failed...')
 
 pygame.init()
 pygame.font.init()
@@ -124,10 +130,17 @@ def gameLoop():
             elif event.type == pygame.MOUSEBUTTONUP:
                 x,y = pygame.mouse.get_pos()
                 if(dialog['switch']):
-                    if(dialog['Button2']['value'] == ''):
-                        if(dialog['Button1']['PosX'] <= x and dialog['Button1']['PosX']+dialog['Button1']['Width'] >= x):
-                            if(dialog['Button1']['PosY'] <= y and dialog['Button1']['PosY']+dialog['Button1']['Height'] >= y):
-                                pass
+                    #if(dialog['Button2']['value'] == ''):
+                    if(dialog['Button1']['PosX'] <= x and dialog['Button1']['PosX']+dialog['Button1']['Width'] >= x):
+                        if(dialog['Button1']['PosY'] <= y and dialog['Button1']['PosY']+dialog['Button1']['Height'] >= y):
+                            a = dialog['id']
+                            s.send(f'G£{a}£0'.encode('UTF-8'))
+                            dialog['switch'] = False
+                    elif(dialog['Button2']['PosX'] <= x and dialog['Button2']['PosX']+dialog['Button2']['Width'] >= x):
+                        if(dialog['Button2']['PosY'] <= y and dialog['Button2']['PosY']+dialog['Button2']['Height'] >= y):
+                            a = dialog['id']
+                            s.send(f'G£{a}£1'.encode('UTF-8'))
+                            dialog['switch'] = False
             elif(event.type == pygame.KEYDOWN):
                 if(event.key == pygame.K_RIGHT):
                     s.send('A'.encode('UTF-8'))
@@ -137,6 +150,8 @@ def gameLoop():
                     s.send('D'.encode('UTF-8'))
                 elif(event.key == pygame.K_DOWN):
                     s.send('C'.encode('UTF-8'))
+                elif(event.key == pygame.K_BACKSPACE):
+                    print('K_Return has been pressed')
                 elif(event.key == pygame.K_t):
                     if(gameState == NORMAL):
                         gameState = TEXTCHAT
@@ -145,7 +160,6 @@ def gameLoop():
                 elif(event.key==pygame.K_TAB):
                     if(gameState == NORMAL or gameState == TEXTCHAT):
                         gameState = PLAYERSLIST
-
                 elif(event.key == pygame.K_RETURN):
                     if(gameState == TEXTCHAT):
                         gameState = NORMAL
@@ -159,10 +173,8 @@ def gameLoop():
                 if(event.key == pygame.K_TAB):
                     gameState = NORMAL
         Transparent_Surface.fill((200, 200, 200, 10))
-
         for checkpoint in checkpoints:
             pygame.draw.circle(Transparent_Surface, (150,10,10,150), (100,200),20)
-        
         if(dialog['switch']):
             pygame.draw.rect(surface, BLACK, (int((SCREEN_WIDTH/2)-(dialog['Width']/2)),int((SCREEN_HEIGHT/2)-(dialog['Height']/2)), dialog['Width'], dialog['Height']))
             pygame.draw.rect(surface, BLUE, (int((SCREEN_WIDTH/2)-(dialog['Width']/2)),int((SCREEN_HEIGHT/2)-(dialog['Height']/2)), dialog['Width'], 20))
@@ -171,7 +183,8 @@ def gameLoop():
             if(dialog['Button2']['value'] == ''):
                 pygame.draw.rect(surface, BLUE, (dialog['Button1']['PosX'],dialog['Button1']['PosY'], dialog['Button1']['Width'],dialog['Button1']['Height']))
                 ptext.draw(dialog['Button1']['value'],(int((SCREEN_WIDTH/2) - int(dialog['Button1']['Width']/2)),int((SCREEN_HEIGHT/2)+(dialog['Height']/2)-27)), color=WHITE)
-
+            else:
+                pass
         for player in players:
             if(player['D'] == SOUTH):
                 playerSheet.draw(surface,0,player['X'], player['Y'])
@@ -247,6 +260,7 @@ def recvMessages():
                         print("test")
                         dialog['Title'] = dialog_title
                         dialog['Content'] = dialog_content
+                        dialog['id'] = dialog_id
                         dialog['switch'] = True
                         dialog['Button1']['value'] = dialog_button1
                         dialog['Button1']['Width'] = len(dialog['Button1']['value']) * 10 + 2
