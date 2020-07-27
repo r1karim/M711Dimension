@@ -1,7 +1,7 @@
 # M711Dimension
 An incomplete multiplayer sandbox game written in python (uses pygame).
 
-#Features:
+# Features:
 -Has its own API (allows server side scripts in lua)
 -Masterlist + (an incomplete) game launcher
 
